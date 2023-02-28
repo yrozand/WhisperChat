@@ -8,17 +8,17 @@ FreyaTalk est une application de chat en temps réel basée sur le protocole TCP
 - Interface utilisateur simple et conviviale
 
 ## Installation
-Pour utiliser WhisperChat, vous devez installer Python 3 et les bibliothèques nécessaires. Vous pouvez installer les bibliothèques en exécutant la commande suivante :
+Pour utiliser FreyaTalk, vous devez installer Python 3 et les bibliothèques nécessaires. Vous pouvez installer les bibliothèques en exécutant la commande suivante :
 
 ```
 pip install -r requirements.txt
 ```
 
 ## Utilisation
-Pour utiliser WhisperChat, vous devez d'abord démarrer le serveur en exécutant le fichier server.py. Ensuite, vous pouvez démarrer l'application en exécutant le fichier client.py. L'application vous demandera l'adresse IP et le port du serveur. Vous pouvez également choisir votre nom d'utilisateur.
+Pour utiliser FreyaTalk, vous devez d'abord démarrer le serveur en exécutant le fichier server.py. Ensuite, vous pouvez démarrer l'application en exécutant le fichier client.py. L'application vous demandera l'adresse IP et le port du serveur. Vous pouvez également choisir votre nom d'utilisateur.
 
 ## Contribuer
-Les contributions sont les bienvenues ! Pour contribuer à WhisperChat, veuillez suivre les étapes suivantes :
+Les contributions sont les bienvenues ! Pour contribuer à FreyaTalk, veuillez suivre les étapes suivantes :
 
     1. Forker ce projet
     2. Créer une branche pour votre fonctionnalité (git checkout -b feature/my-feature)
