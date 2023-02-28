@@ -1,9 +1,9 @@
-# WhisperChat
+# FreyaTalk Client
 This code provides a graphical user interface for a client to connect to a chat server and send/receive messages. The client uses sockets to communicate with the server and tkinter library for the GUI.
 
 ## Installation
 
-Pour installer WhisperChat. Installés Python et Git.
+Pour utiliser FreyaTalk Client. Installés Python et Git.
 
 Python: https://www.python.org/downloads/ 
 
@@ -12,9 +12,9 @@ Git: https://git-scm.com/downloads
 
 Procédure d'installation: 
 ```bash
-  mkdir WhisperChat
-  cd WhisperChat
-  git clone https://github.com/yrozand/WhisperChat.git
+  mkdir FreyaTalk
+  cd FreyaTalk
+  git clone https://github.com/yrozand/FreyaTalk.git
   pip install -r requirements.txt
 ```
 Démarée la partie serveur
@@ -127,6 +127,5 @@ Une fenêtre principale est créée à l'aide de la classe Tk.
 
 ```
 root = tk.Tk()
-root.title("WhisperChat")
+root.title("FreyaTalk")
 ```
-
