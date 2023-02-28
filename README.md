@@ -1,5 +1,5 @@
-# WhisperChat
-WhisperChat est une application de chat en temps réel basée sur le protocole TCP/IP. Cette application permet à plusieurs utilisateurs de communiquer entre eux en utilisant un serveur centralisé. L'interface utilisateur est réalisée en utilisant le module tkinter de Python.
+# FreyaTalk
+FreyaTalk est une application de chat en temps réel basée sur le protocole TCP/IP. Cette application permet à plusieurs utilisateurs de communiquer entre eux en utilisant un serveur centralisé. L'interface utilisateur est réalisée en utilisant le module tkinter de Python.
 
 ## Fonctionnalités
 - Connexion à un serveur centralisé
@@ -27,7 +27,7 @@ Les contributions sont les bienvenues ! Pour contribuer à WhisperChat, veuillez
     5. Ouvrir une Pull Request
 
 ## Auteur
-WhisperChat à été développé par [Yanis Rozand](https://www.github.com/yrozand).
+FreyaTalk à été développé par [Yanis Rozand](https://www.github.com/yrozand).
 
 ## Licence
 Ce projet est sous licence MIT. Voir le fichier LICENSE pour plus d'informations.
