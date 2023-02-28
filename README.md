@@ -30,4 +30,4 @@ Les contributions sont les bienvenues ! Pour contribuer à WhisperChat, veuillez
 FreyaTalk à été développé par [Yanis Rozand](https://www.github.com/yrozand).
 
 ## Licence
-Ce projet est sous licence MIT. Voir le fichier LICENSE pour plus d'informations.
+Ce projet est sous licence Apache. Voir le fichier LICENSE pour plus d'informations.
