@@ -1,5 +1,4 @@
 # FreyaTalk
-<img src="https://st4.depositphotos.com/36808514/40874/v/600/depositphotos_408740102-stock-illustration-freya-norse-mythology-goddess.jpg" widht=512 height=450>
 FreyaTalk est une application de chat en temps réel basée sur le protocole TCP/IP. Cette application permet à plusieurs utilisateurs de communiquer entre eux en utilisant un serveur centralisé. L'interface utilisateur est réalisée en utilisant le module tkinter de Python.
 
 ## Fonctionnalités
