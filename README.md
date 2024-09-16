@@ -1,33 +1,48 @@
-# FreyaTalk
-FreyaTalk est une application de chat en temps réel basée sur le protocole TCP/IP. Cette application permet à plusieurs utilisateurs de communiquer entre eux en utilisant un serveur centralisé. L'interface utilisateur est réalisée en utilisant le module tkinter de Python.
+<h1 align="center" id="title">FreyaTalk</h1>
 
-## Fonctionnalités
-- Connexion à un serveur centralisé
-- Communication bidirectionnelle entre les utilisateurs connectés au serveur
-- Liste des utilisateurs connectés
-- Interface utilisateur simple et conviviale
+<p align="center"><img src="https://socialify.git.ci/yrozand/FreyaTalk/image?description=1&amp;descriptionEditable=FreyaTalk%20is%20a%20real-time%20chat%20application%20based%20on%20the%20TCP%2FIP%20protocol.&amp;font=Source%20Code%20Pro&amp;forks=1&amp;issues=1&amp;language=1&amp;name=1&amp;owner=1&amp;pattern=Plus&amp;stargazers=1&amp;theme=Auto" alt="project-image"></p>
 
-## Installation
-Pour utiliser FreyaTalk, vous devez installer Python 3 et les bibliothèques nécessaires. Vous pouvez installer les bibliothèques en exécutant la commande suivante :
+<p id="description">FreyaTalk is a real-time chat application based on the TCP/IP protocol. It enables multiple users to communicate with each other using a centralized server.</p>
+
+## Project Status
+This project is currently under development
+
+
+## Features
+- Connection to a centralized server
+- Two-way communication between users connected to the server
+- List of connected users
+
+## Install
+For the server version, install python and the necessary libraries. You can install the libraries by running the following command:
 
 ```
 pip install -r requirements.txt
 ```
 
-## Utilisation
-Pour utiliser FreyaTalk, vous devez d'abord démarrer le serveur en exécutant le fichier server.py. Ensuite, vous pouvez démarrer l'application en exécutant le fichier client.py. L'application vous demandera l'adresse IP et le port du serveur. Vous pouvez également choisir votre nom d'utilisateur.
+For the client version, install python . You can launch the client python file by executing the following command:
 
-## Contribuer
-Les contributions sont les bienvenues ! Pour contribuer à FreyaTalk, veuillez suivre les étapes suivantes :
+```
+python client.py
+```
 
-    1. Forker ce projet
-    2. Créer une branche pour votre fonctionnalité (git checkout -b feature/my-feature)
-    3. Commiter vos changements (git commit -am 'Add some feature')
-    4. Pousser vers la branche (git push origin feature/my-feature)
-    5. Ouvrir une Pull Request
+## Usage
+To use FreyaTalk, you must first start the server by executing the server.py file. Next, you can start the application by executing the client.py file. The application will ask you for the server's IP address and port. You can also choose your user name.
 
-## Auteur
-FreyaTalk à été développé par [Yanis Rozand](https://www.github.com/yrozand).
+## Contribute
+Contributions are welcome! To contribute to FreyaTalk, please follow these steps:
 
-## Licence
-Ce projet est sous licence Apache. Voir le fichier LICENSE pour plus d'informations.
+    1. Fork this project
+    2. Create a branch for your feature (git checkout -b feature/my-feature)
+    3. Commit your changes (git commit -am 'Add some feature')
+    4. Push to branch (git push origin feature/my-feature).
+    5. Open a Pull Request
+
+## Problem
+If you have any problem please do not hesitate to make a new issue on the project.
+
+## Author
+FreyaTalk was developed by [Yanis Rozand](https://www.github.com/yrozand).
+
+## License
+This project is licensed under the Apache license. See the LICENSE file for more information.
