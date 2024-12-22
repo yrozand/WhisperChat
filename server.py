@@ -1,9 +1,29 @@
 import socket
 import threading
 import random
+import logging
+from logging.handlers import RotatingFileHandler
+import shutil
+import os
+from datetime import datetime
+
+# Configuration du logger avec rotation des fichiers de log
+log_dir = "logs"
+if not os.path.exists(log_dir):
+    os.makedirs(log_dir)
+
+# Générer un timestamp pour le nom du fichier de log
+timestamp = datetime.now().strftime("%d-%m-%y_%H-%M-%S")
+log_file = os.path.join(log_dir, f"server_{timestamp}.log")
+
+handler = RotatingFileHandler(log_file, maxBytes=1024*1024, backupCount=3, encoding='utf-8')
+logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s', handlers=[
+    handler,
+    logging.StreamHandler()
+])
 
 clients = {}
-used_names = set()  # Pour suivre les noms déjà attribués
+used_names = set()
 
 phonetic_alphabet = [
     'Alpha', 'Bravo', 'Charlie', 'Delta', 'Echo', 'Foxtrot', 'Golf', 'Hotel', 'India', 'Juliet',
@@ -12,83 +32,96 @@ phonetic_alphabet = [
 ]
 
 def assign_unique_name():
-    """Assigner un nom unique à partir de l'Alphabet Phonétique International."""
     available_names = list(set(phonetic_alphabet) - used_names)
     if available_names:
         name = random.choice(available_names)
-        used_names.add(name)  # Marquer le nom comme utilisé
+        used_names.add(name)
         return name
     else:
-        return "Utilisateur"  # En cas de panne de noms (improbable)
+        return "Utilisateur"
 
 def broadcast(message, sender_socket=None):
-    """Diffuser un message à tous les clients, sauf éventuellement l'expéditeur."""
-    for client in clients.values():
-        if client != sender_socket:
+    for client_socket in clients.values():
+        if client_socket != sender_socket:
             try:
-                client.send(message)
-            except:
-                remove_client(client)
+                client_socket.send(message.encode('utf-8'))
+            except Exception as e:
+                logging.error(f"Error sending message to a client: {e}")
 
-def handle_client(client_socket, addr):
-    """Gérer la communication avec un client."""
+def send_private_message(sender_name, recipient_name, message):
+    if recipient_name in clients:
+        try:
+            clients[recipient_name].send(f"PRIVATE:{sender_name}:{message}".encode('utf-8'))
+        except Exception as e:
+            logging.error(f"Error sending private message to {recipient_name}: {e}")
+
+def broadcast_user_list():
+    user_list = ",".join(clients.keys())
+    broadcast(f"USER_LIST:{user_list}")
+
+def handle_client(client_socket, client_name):
     try:
-        # Assigner un nom unique au client
-        client_name = assign_unique_name()
-        clients[client_name] = client_socket  # Associer le nom au socket du client
-
-        # Envoyer un message de bienvenue
-        welcome_message = f"Bienvenue, {client_name} ! Tapez 'exit()' pour quitter."
-        client_socket.send(welcome_message.encode('utf-8'))
-
-        # Informer les autres clients qu'un nouveau participant a rejoint
-        join_message = f"{client_name} a rejoint le chat !".encode('utf-8')
-        broadcast(join_message, client_socket)
-
-        # Gérer les messages reçus du client
         while True:
             try:
                 message = client_socket.recv(1024).decode('utf-8')
-                
-                # Vérifier si le client a tapé 'exit()' pour se déconnecter
-                if message.strip().lower() == 'exit()':
-                    break  # Quitter la boucle pour déconnecter le client
-                
-                # Diffuser le message à tous les autres clients avec le nom du client
-                full_message = f"{client_name}: {message}".encode('utf-8')
-                broadcast(full_message, client_socket)
-            except:
-                break  # En cas d'erreur, quitter la boucle
+                if not message:
+                    break
+                if message.startswith("PRIVATE:"):
+                    _, recipient_name, private_message = message.split(":", 2)
+                    send_private_message(client_name, recipient_name, private_message)
+                else:
+                    full_message = f"{client_name}: {message}"
+                    broadcast(full_message, client_socket)
+            except Exception as e:
+                logging.error(f"Error receiving message from {client_name}: {e}")
+                break
     finally:
-        # Informer les autres clients que le participant a quitté
-        leave_message = f"{client_name} a quitté le chat.".encode('utf-8')
+        leave_message = f"{client_name} a quitté le chat."
         broadcast(leave_message)
-
-        # Fermer la connexion et retirer le client
         remove_client(client_socket, client_name)
 
 def remove_client(client_socket, client_name):
-    """Enlever un client de la liste et fermer sa connexion."""
     if client_name in clients:
-        del clients[client_name]  # Supprimer le client du dictionnaire
-        used_names.discard(client_name)  # Libérer le nom pour qu'il puisse être réutilisé
-        client_socket.close()  # Fermer la connexion du client
+        del clients[client_name]
+        used_names.discard(client_name)
+        client_socket.close()
+        logging.info(f"Client {client_name} has been removed.")
+        broadcast_user_list()
+
+def archive_old_logs():
+    log_files = sorted([f for f in os.listdir(log_dir) if f.startswith("server_") and f.endswith(".log")], key=lambda x: os.path.getmtime(os.path.join(log_dir, x)))
+    if len(log_files) > 3:
+        oldest_log = log_files[0]
+        archive_dir = os.path.join(log_dir, "archive")
+        if not os.path.exists(archive_dir):
+            os.makedirs(archive_dir)
+        shutil.move(os.path.join(log_dir, oldest_log), os.path.join(archive_dir, oldest_log))
 
 def start_server():
-    """Démarrer le serveur et accepter les connexions des clients."""
+    archive_old_logs()
+    
     server_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-    server_socket.bind(('0.0.0.0', 6969))  # Remplacer par l'adresse IP et le port de ton serveur
+    server_socket.bind(('0.0.0.0', 6969))
     server_socket.listen()
-
-    print("Le serveur est démarré, en attente de connexions...")
+    logging.info("Le serveur est démarré, en attente de connexions...")
 
     while True:
-        client_socket, addr = server_socket.accept()
-        print(f"Client connecté depuis {addr}")
+        try:
+            client_socket, addr = server_socket.accept()
+            logging.info(f"Connexion acceptée de {addr}")
 
-        # Lancer un thread pour gérer ce client
-        thread = threading.Thread(target=handle_client, args=(client_socket, addr))
-        thread.start()
+            client_name = assign_unique_name()
+            clients[client_name] = client_socket
+            logging.info(f"Client {client_name} connected from {addr}")
+
+            welcome_message = f"{client_name} a rejoint le chat."
+            broadcast(welcome_message)
+            broadcast_user_list()
+
+            client_thread = threading.Thread(target=handle_client, args=(client_socket, client_name))
+            client_thread.start()
+        except Exception as e:
+            logging.error(f"Error accepting connection: {e}")
 
 if __name__ == "__main__":
     start_server()
