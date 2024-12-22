@@ -1,2 +1,6 @@
 socket
 threading
+sys
+PyQt5.QtWidgets
+PyQt5.QtGui
+PyQt5
