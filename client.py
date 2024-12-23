@@ -4,24 +4,21 @@ import threading
 import logging
 import os
 from PyQt5.QtWidgets import QApplication, QWidget, QVBoxLayout, QTextEdit, QLineEdit, QPushButton, QLabel, QDialog, QMessageBox, QHBoxLayout, QComboBox, QSystemTrayIcon, QMenu, QFileDialog, QMainWindow, QListWidget, QSplitter, QListWidgetItem, QTabWidget
-from PyQt5.QtGui import QIcon, QColor
-from PyQt5.QtCore import pyqtSignal, pyqtSlot, QObject, Qt
+from PyQt5.QtGui import QIcon, QColor, QDesktopServices
+from PyQt5.QtCore import pyqtSignal, pyqtSlot, QObject, Qt, QUrl
 import re
 
 # Configuration du logger
 logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
 
-class ConnectionWindow(QDialog):
-    """Initial window for entering server IP and port."""
-    def __init__(self, parent=None):
-        super().__init__(parent)
-        self.client = parent
-        self.initUI()
-
-    def initUI(self):
-        self.setWindowTitle("FreyaTalk Connect")
+class ConnectDialog(QDialog):
+    def __init__(self, client):
+        super().__init__()
+        self.client = client
+        self.setWindowTitle("Connect to Server")
         self.setGeometry(200, 200, 300, 200)
         self.setWindowIcon(QIcon('discord.ico'))  # Set custom icon
+        layout = QVBoxLayout()
 
         self.server_ip_label = QLabel("Server IP:", self)
         self.server_ip_input = QLineEdit(self)
@@ -31,26 +28,53 @@ class ConnectionWindow(QDialog):
         self.server_port_input = QLineEdit(self)
         self.server_port_input.setPlaceholderText("Enter server port")
 
+        self.username_label = QLabel("Username:", self)
+        self.username_input = QLineEdit(self)
+        self.username_input.setPlaceholderText("Enter username")
+
         self.connect_button = QPushButton("Connect", self)
         self.connect_button.clicked.connect(self.connect_to_server)
 
-        layout = QVBoxLayout()
         layout.addWidget(self.server_ip_label)
         layout.addWidget(self.server_ip_input)
         layout.addWidget(self.server_port_label)
         layout.addWidget(self.server_port_input)
+        layout.addWidget(self.username_label)
+        layout.addWidget(self.username_input)
         layout.addWidget(self.connect_button)
+
         self.setLayout(layout)
+        self.apply_dark_theme()
 
     def connect_to_server(self):
         server_ip = self.server_ip_input.text()
         server_port = self.server_port_input.text()
+        username = self.username_input.text()
         if self.client:
-            success = self.client.connect_to_server(server_ip, server_port)
+            success = self.client.connect_to_server(server_ip, server_port, username)
             if success:
                 self.accept()
             else:
-                QMessageBox.critical(self, "Connection Error", "Failed to connect to the server. Please check the IP and port.")
+                QMessageBox.critical(self, "Connection Error", "Failed to connect to the server. Please check the IP, port, and username.")
+
+    def apply_dark_theme(self):
+        self.setStyleSheet("""
+        QWidget {
+            background-color: #2C2F33;
+            color: #FFFFFF;
+        }
+        QLineEdit, QTextEdit {
+            background-color: #23272A;
+            color: #FFFFFF;
+        }
+        QPushButton {
+            background-color: #7289DA;
+            color: #FFFFFF;
+        }
+        QLabel {
+            color: #FFFFFF;
+        }
+        """)
 
 class FreyaTalkClient(QMainWindow):
     message_received = pyqtSignal(str)
@@ -98,25 +122,44 @@ class FreyaTalkClient(QMainWindow):
         self.chat_display.setReadOnly(True)
         self.main_chat_layout.addWidget(self.chat_display)
 
+        # Message input and send button layout
+        input_layout = QHBoxLayout()
         self.message_input = QLineEdit()
         self.message_input.setPlaceholderText("Type your message here...")
         self.message_input.returnPressed.connect(self.send_message)
-        self.main_chat_layout.addWidget(self.message_input)
+        input_layout.addWidget(self.message_input)
 
-        self.send_button = QPushButton("Send")
+        self.send_button = QPushButton()
+        self.send_button.setIcon(QIcon("paper-plane.png"))
+        self.send_button.setFixedSize(50, 50)
         self.send_button.clicked.connect(self.send_message)
-        self.main_chat_layout.addWidget(self.send_button)
+        input_layout.addWidget(self.send_button)
+
+        self.main_chat_layout.addLayout(input_layout)
+
+        # Settings, Donation, and Quit buttons layout
+        buttons_layout = QHBoxLayout()
+
+        self.settings_button = QPushButton()
+        self.settings_button.setIcon(QIcon("settings-sliders.png"))
+        self.settings_button.setFixedSize(50, 50)
+        buttons_layout.addWidget(self.settings_button)
+
+        self.donation_button = QPushButton()
+        self.donation_button.setIcon(QIcon("donate.png"))
+        self.donation_button.setFixedSize(50, 50)
+        self.donation_button.clicked.connect(lambda: QDesktopServices.openUrl(QUrl("https://ko-fi.com/yrozand")))
+        buttons_layout.addWidget(self.donation_button)
+
+        self.quit_button = QPushButton()
+        self.quit_button.setIcon(QIcon("power.png"))
+        self.quit_button.setFixedSize(50, 50)
+        self.quit_button.clicked.connect(self.close)
+        buttons_layout.addWidget(self.quit_button)
+
+        self.main_chat_layout.addLayout(buttons_layout)
 
         self.chat_tabs.addTab(self.main_chat_tab, "Main Chat")
-
-        # Add disconnect and quit buttons
-        self.disconnect_button = QPushButton("Disconnect")
-        self.disconnect_button.clicked.connect(self.disconnect)
-        self.main_chat_layout.addWidget(self.disconnect_button)
-
-        self.quit_button = QPushButton("Quit")
-        self.quit_button.clicked.connect(self.close)
-        self.main_chat_layout.addWidget(self.quit_button)
 
         main_layout.addWidget(splitter)
 
@@ -228,10 +271,12 @@ class FreyaTalkClient(QMainWindow):
             self.private_windows[recipient] = self.create_private_message_tab(recipient)
         self.chat_tabs.setCurrentWidget(self.private_windows[recipient].parentWidget())
 
-    def connect_to_server(self, server_ip, server_port):
+    def connect_to_server(self, server_ip, server_port, username):
         try:
             self.client_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
             self.client_socket.connect((server_ip, int(server_port)))
+            self.client_socket.send(username.encode('utf-8'))
+            self.username = username
             logging.info(f"Connected to server at {server_ip}:{server_port}")
 
             # Start a thread to listen for messages from the server
@@ -258,14 +303,14 @@ class FreyaTalkClient(QMainWindow):
             self.client_socket.close()
             self.client_socket = None
         self.hide()
-        connection_window = ConnectionWindow(self)
+        connection_window = ConnectDialog(self)
         if connection_window.exec_() == QDialog.Accepted:
             self.show()
 
 if __name__ == "__main__":
     app = QApplication(sys.argv)
     client = FreyaTalkClient()
-    connection_window = ConnectionWindow(client)
-    if connection_window.exec_() == QDialog.Accepted:
+    dialog = ConnectDialog(client)
+    if dialog.exec_() == QDialog.Accepted:
         client.show()
     sys.exit(app.exec_())
