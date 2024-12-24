@@ -142,18 +142,18 @@ class FreyaTalkClient(QMainWindow):
 
         self.settings_button = QPushButton()
         self.settings_button.setIcon(QIcon("settings-sliders.png"))
-        self.settings_button.setFixedSize(50, 50)
+        self.settings_button.setFixedSize(250, 50)
         buttons_layout.addWidget(self.settings_button)
 
         self.donation_button = QPushButton()
         self.donation_button.setIcon(QIcon("donate.png"))
-        self.donation_button.setFixedSize(50, 50)
+        self.donation_button.setFixedSize(250, 50)
         self.donation_button.clicked.connect(lambda: QDesktopServices.openUrl(QUrl("https://ko-fi.com/yrozand")))
         buttons_layout.addWidget(self.donation_button)
 
         self.quit_button = QPushButton()
         self.quit_button.setIcon(QIcon("power.png"))
-        self.quit_button.setFixedSize(50, 50)
+        self.quit_button.setFixedSize(250, 50)
         self.quit_button.clicked.connect(self.close)
         buttons_layout.addWidget(self.quit_button)
 
