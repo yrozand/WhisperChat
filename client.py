@@ -15,9 +15,9 @@ class ConnectDialog(QDialog):
     def __init__(self, client):
         super().__init__()
         self.client = client
-        self.setWindowTitle("Connect to Server")
+        self.setWindowTitle("Freya Connect")
         self.setGeometry(200, 200, 300, 200)
-        self.setWindowIcon(QIcon('discord.ico'))  # Set custom icon
+        self.setWindowIcon(QIcon('freyatalkico.png'))  # Set custom icon
         layout = QVBoxLayout()
 
         self.server_ip_label = QLabel("Server IP:", self)
@@ -96,7 +96,7 @@ class FreyaTalkClient(QMainWindow):
     def initUI(self):
         self.setWindowTitle("FreyaTalk Chat")
         self.setGeometry(200, 200, 1280, 720)
-        self.setWindowIcon(QIcon('discord.png'))  # Set custom icon
+        self.setWindowIcon(QIcon('freyatalkico.png'))  # Set custom icon
 
         # Main layout
         main_layout = QVBoxLayout()

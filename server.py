@@ -1,8 +1,8 @@
 import argparse
-import socket
-import threading
 import logging
 import os
+import socket
+import threading
 from datetime import datetime
 from logging.handlers import RotatingFileHandler
 
@@ -28,56 +28,47 @@ def broadcast(message, sender_socket=None):
             try:
                 client_socket.send(message.encode('utf-8'))
             except Exception as e:
-                logging.error(f"Error sending message to a client: {e}")
+                logging.error(f"Error broadcasting message: {e}")
 
 def send_private_message(sender_name, recipient_name, message):
     for client_socket, client_name in clients.items():
         if client_name == recipient_name:
             try:
-                client_socket.send(f"PRIVATE:{sender_name}:{message}".encode('utf-8'))
+                client_socket.send(f"Private message from {sender_name}: {message}".encode('utf-8'))
                 return True
             except Exception as e:
-                logging.error(f"Error sending private message to {recipient_name}: {e}")
+                logging.error(f"Error sending private message: {e}")
                 return False
     return False
 
 def handle_client(client_socket, addr):
+    logging.info(f"New connection from {addr}")
     try:
         username = client_socket.recv(1024).decode('utf-8')
-        if username in clients.values():
-            client_socket.send("USERNAME_TAKEN".encode('utf-8'))
-            client_socket.close()
-            return
         clients[client_socket] = username
-        logging.info(f"{username} connected from {addr}")
-
-        welcome_message = f"{username} a rejoint le chat."
-        broadcast(welcome_message, client_socket)
         broadcast_user_list()
-
-        # Send the user list to the newly connected client
-        user_list = ",".join(clients.values())
-        client_socket.send(f"USER_LIST:{user_list}".encode('utf-8'))
-
         while True:
             message = client_socket.recv(1024).decode('utf-8')
-            if not message:
-                break
-            logging.info(f"Received message from {username}: {message}")
-            broadcast(f"{username}: {message}", client_socket)
+            if message.startswith("/pm"):
+                parts = message.split(" ", 2)
+                if len(parts) == 3:
+                    recipient_name = parts[1]
+                    private_message = parts[2]
+                    if not send_private_message(clients[client_socket], recipient_name, private_message):
+                        client_socket.send(f"User {recipient_name} not found.".encode('utf-8'))
+            else:
+                broadcast(f"{clients[client_socket]}: {message}", client_socket)
     except Exception as e:
         logging.error(f"Error handling client {addr}: {e}")
     finally:
-        if client_socket in clients:
-            del clients[client_socket]
+        logging.info(f"Connection closed for {addr}")
+        clients.pop(client_socket, None)
         client_socket.close()
-        logging.info(f"{username} disconnected")
-        broadcast(f"{username} a quitté le chat.")
         broadcast_user_list()
 
 def broadcast_user_list():
-    user_list = ",".join(clients.values())
-    broadcast(f"USER_LIST:{user_list}")
+    user_list = "listmembre " + " ".join(clients.values())
+    broadcast(user_list)
 
 def start_server(port):
     server_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
@@ -95,6 +86,6 @@ def start_server(port):
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description="FreyaTalk Server")
-    parser.add_argument('--port', type=int, default=12345, help='Port to run the server on')
+    parser.add_argument('--port', type=int, default=6969, help='Port to run the server on')
     args = parser.parse_args()
     start_server(args.port)
